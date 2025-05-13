@@ -5,7 +5,7 @@ from tkinter import messagebox, simpledialog
 class MemoryGame:
     def __init__(self, root, grid_size):
         self.root = root
-        self.root.title("Memory Card Matching Game")
+        self.root.title("NEW Memory Card Matching Game")
         self.grid_size = grid_size  # User-defined grid size
         self.symbols = list("ABCDEFGHIJKLMNOPQRSTUVWXYZ")[:self.grid_size**2 // 2] * 2
         random.shuffle(self.symbols)
