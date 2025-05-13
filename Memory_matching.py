@@ -11,7 +11,11 @@ class MemoryGame:
         random.shuffle(self.symbols)
         self.buttons = []
         self.flipped = []
+        self.time_left = 120  # 2 minutes in seconds
+        self.timer_label = tk.Label(self.root, text=f"Time Left: {self.time_left}s", font=("Arial", 14))
+        self.timer_label.grid(row=self.grid_size, column=0, columnspan=self.grid_size)
         self.create_board()
+        self.start_timer()
 
     def create_board(self):
         for row in range(self.grid_size):
@@ -22,6 +26,14 @@ class MemoryGame:
                 btn.grid(row=row, column=col, padx=5, pady=5)
                 button_row.append(btn)
             self.buttons.append(button_row)
+
+    def start_timer(self):
+        if self.time_left > 0:
+            self.time_left -= 1
+            self.timer_label.config(text=f"Time Left: {self.time_left}s")
+            self.root.after(1000, self.start_timer)
+        else:
+            self.end_game("Time's up! You ran out of time.")
 
     def flip_card(self, row, col):
         if len(self.flipped) < 2 and not self.buttons[row][col]["text"]:
@@ -44,8 +56,13 @@ class MemoryGame:
 
         self.flipped = []
 
+        # Corrected line: Use self.buttons instead of buttons
         if all(btn["state"] == "disabled" for row in self.buttons for btn in row):
-            messagebox.showinfo("Congratulations!", "You matched all the cards!")
+            self.end_game("Congratulations! You matched all the cards!")
+
+    def end_game(self, message):
+        messagebox.showinfo("Game Over", message)
+        self.root.destroy()
 
 if __name__ == "__main__":
     root = tk.Tk()
