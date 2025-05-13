@@ -1,6 +1,7 @@
 import tkinter as tk
 import random
 from tkinter import messagebox, simpledialog
+import os  # For file handling
 
 class MemoryGame:
     def __init__(self, root, grid_size):
@@ -12,20 +13,54 @@ class MemoryGame:
         self.buttons = []
         self.flipped = []
         self.score = 0  # Initialize score
+        self.time_left = 60  # Set the timer (in seconds)
+        self.high_score = self.load_high_score()  # Load high score from file
         self.create_score_label()  # Create score label
+        self.create_timer_label()  # Create timer label
         self.create_board()
+        self.start_timer()  # Start the timer
+
+    def load_high_score(self):
+        """Load the high score from a file."""
+        if os.path.exists("high_score.txt"):
+            with open("high_score.txt", "r") as file:
+                return int(file.read())
+        return 0  # Default high score if file doesn't exist
+
+    def save_high_score(self):
+        """Save the high score to a file."""
+        with open("high_score.txt", "w") as file:
+            file.write(str(self.high_score))
 
     def create_score_label(self):
         """Create a label to display the score."""
         self.score_label = tk.Label(self.root, text=f"Score: {self.score}", font=("Arial", 14))
-        self.score_label.grid(row=0, column=0, columnspan=self.grid_size, pady=(10, 0))
+        self.score_label.grid(row=0, column=0, columnspan=self.grid_size // 2, pady=(10, 0))
 
     def update_score(self):
         """Update the score label."""
         self.score_label.config(text=f"Score: {self.score}")
 
+    def create_timer_label(self):
+        """Create a label to display the timer."""
+        self.timer_label = tk.Label(self.root, text=f"Time Left: {self.time_left}s", font=("Arial", 14))
+        self.timer_label.grid(row=0, column=self.grid_size // 2, columnspan=self.grid_size // 2, pady=(10, 0))
+
+    def update_timer(self):
+        """Update the timer label."""
+        self.timer_label.config(text=f"Time Left: {self.time_left}s")
+
+    def start_timer(self):
+        """Start the countdown timer."""
+        if self.time_left > 0:
+            self.time_left -= 1
+            self.update_timer()
+            self.root.after(1000, self.start_timer)
+        else:
+            self.end_game("Time's up! You ran out of time!")
+
     def create_board(self):
-        for row in range(1, self.grid_size + 1):  # Adjust row index to account for score label
+        for row in range(1, self.grid_size + 1):  # Adjust row index to account for score and timer labels
             button_row = []
             for col in range(self.grid_size):
                 btn = tk.Button(self.root, text="", width=8, height=4,
@@ -58,7 +93,18 @@ class MemoryGame:
         self.flipped = []
 
         if all(btn["state"] == "disabled" for row in self.buttons for btn in row):
-            messagebox.showinfo("Congratulations!", f"You matched all the cards! Final Score: {self.score}")
+            self.end_game(f"Congratulations! You matched all the cards! Final Score: {self.score}")
+
+    def end_game(self, message):
+        """End the game and display a message."""
+        if self.score > self.high_score:
+            self.high_score = self.score
+            self.save_high_score()
+            message += f"\nNew High Score: {self.high_score}!"
+        else:
+            message += f"\nHigh Score: {self.high_score}"
+        messagebox.showinfo("Game Over", message)
+        self.root.destroy()
 
 if __name__ == "__main__":
     root = tk.Tk()
