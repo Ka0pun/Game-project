@@ -3,27 +3,35 @@ import random
 from tkinter import messagebox, simpledialog
 import os
 
-class MemoryGame:    def __init__(self, root, grid_size):
+class MemoryGame:
+    def __init__(self, root, grid_size):
         self.root = root
-        self.root.title("NEW Memory Card Matching Game")
+        self.root.title("Memory Card Matching Game")
         self.grid_size = grid_size
-        self.symbols = list(range(self.grid_size**2 // 2)) * 2  # Use numbers for image indices
+        self.symbols = list(range(self.grid_size**2 // 2)) * 2
         random.shuffle(self.symbols)
         self.buttons = []
         self.flipped = []
         self.score = 0
         self.time_left = 60
         self.high_score = self.load_high_score()
+        
+        # Load the back image first
         try:
             self.back_image = tk.PhotoImage(file=os.path.join("images", "back.png"))
         except Exception as e:
             print(f"Error loading back.png: {e}")
-            self.back_image = None
+            # Create a default back image
+            self.back_image = tk.PhotoImage(width=64, height=64)
+        
+        # Load card images
         self.images = self.load_images()
         self.create_score_label()
         self.create_timer_label()
         self.create_board()
-        self.start_timer()    def load_images(self):
+        self.start_timer()
+
+    def load_images(self):
         images = []
         for i in range(self.grid_size**2 // 2):
             img_path = os.path.join("images", f"img{i}.png")
@@ -74,7 +82,7 @@ class MemoryGame:    def __init__(self, root, grid_size):
             button_row = []
             for col in range(self.grid_size):
                 btn = tk.Button(self.root, image=self.back_image, width=64, height=64,
-                                command=lambda r=row - 1, c=col: self.flip_card(r, c))
+                              command=lambda r=row-1, c=col: self.flip_card(r, c))
                 btn.grid(row=row, column=col, padx=5, pady=5)
                 button_row.append(btn)
             self.buttons.append(button_row)
@@ -120,15 +128,7 @@ class MemoryGame:    def __init__(self, root, grid_size):
 
 if __name__ == "__main__":
     root = tk.Tk()
-    grid_size = simpledialog.askinteger("Grid Size", "Enter grid size (e.g., 4 for 4x4):", minvalue=2, maxvalue=10)
+    grid_size = simpledialog.askinteger("Grid Size", "Enter grid size (e.g., 4 for 4x4, maximum is 4):", minvalue=2, maxvalue=4)
     if grid_size:
         game = MemoryGame(root, grid_size)
         root.mainloop()
-    img_path = os.path.join("images", "back.png")
-    try:
-        img = tk.PhotoImage(file=img_path)
-        label = tk.Label(root, image=img)
-        label.pack()
-        root.mainloop()
-    except Exception as e:
-        print(f"Error loading image: {e}")
